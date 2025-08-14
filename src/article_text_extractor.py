@@ -1,6 +1,25 @@
 import requests, trafilatura
 
 def extract_article_text(url):
+    """
+    Fetch a web page and return its main article text.
+
+    This function downloads the HTML at `url` using `requests.get(...)` and then
+    extracts the primary article/body text with `trafilatura.extract(...)`
+    (configured to avoid comments, tables, and to deduplicate content).
+    If no text can be extracted, it raises a `RuntimeError`.
+
+    Parameters
+    ----------
+    url : str
+        Absolute HTTP(S) URL of the page to extract.
+
+    Returns
+    -------
+    str
+        The extracted plain-text content of the page.
+    """
+        
     html = requests.get(url, timeout=20).text
     text = trafilatura.extract(
         html,

@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Dict
+from typing import Dict, List, Any
 import time
 from google import genai
 
@@ -10,8 +10,23 @@ load_dotenv()  #load environment variables from .env file
 
 
 
-def parse_fallback_response(text: str) -> Dict:
-    """Fallback parser if JSON extraction fails."""
+def parse_fallback_response(text: str) -> Dict[str, List[str]]:
+    """
+    Parse a loosely structured text response to recover location lists.
+    This fallback is used when a model fails to return valid JSON.
+
+    Parameters
+    ----------
+    text : str
+        The raw, unstructured model output to parse.
+
+    Returns
+    -------
+    Dict[str, List[str]]
+        A dictionary with keys 'cities', 'states_provinces', 'countries',
+        'landmarks', and 'regions', each mapping to a list of strings
+        (possibly empty) extracted from the text.
+    """
     locations = {
         "cities": [],
         "states_provinces": [],
@@ -44,8 +59,44 @@ def parse_fallback_response(text: str) -> Dict:
     return locations
     
                 
-def extract_locations_with_gemini(text: str, client, model_name:str, test_mode = False) -> Dict:
-    """Use Gemini API to extract locations from text."""
+def extract_locations_with_gemini(
+    text: str,
+    client: Any,
+    model_name: str,
+    test_mode: bool = False
+) -> Dict[str, List[str]]:
+    """
+    Use a Gemini client to extract and categorize locations mentioned in text.
+    Sends a structured prompt to `client.models.generate_content(...)` asking for
+    JSON with structured parallel lists (equal length across keys).
+
+    Parameters
+    ----------
+    text : str
+        The article or snippet to analyze.
+    client : Any
+        A Gemini client instance exposing `models.generate_content(...)`.
+        (e.g., `google.genai.Client`).
+    model_name : str
+        The name of the Gemini model to call.
+    test_mode : bool, optional
+        If True, prints the raw input for debugging, by default False.
+
+    Returns
+    -------
+    Dict[str, List[str]]
+        A dictionary with keys:
+            - "cities"
+            - "provinces_counties"
+            - "states"
+            - "countries"
+            - "landmarks"
+            - "summary" (one short reason per location)
+        , each mapping to a list of strings.
+        On failures in upstream calls, the implementation may return an empty
+        dict or a best-effort parsed structure.
+    """
+
     if test_mode:
         print(f"\n{'#'*20}text input to gemini: {text}\n{'#'*20}")
     # Craft a detailed prompt for location extraction
@@ -158,40 +209,6 @@ def extract_locations_with_gemini(text: str, client, model_name:str, test_mode =
                 continue
             else:
                 return {}     
-        
-    
-def parse_fallback_response(text: str) -> Dict:
-    """Fallback parser if JSON extraction fails."""
-    locations = {
-        "cities": [],
-        "states_provinces": [],
-        "countries": [],
-        "landmarks": [],
-        "regions": []
-    }
-    
-    # Simple pattern matching as fallback
-    lines = text.split('\n')
-    current_category = None
-    
-    for line in lines:
-        line = line.strip()
-        if 'cities' in line.lower():
-            current_category = 'cities'
-        elif 'states' in line.lower() or 'provinces' in line.lower():
-            current_category = 'states_provinces'
-        elif 'countries' in line.lower():
-            current_category = 'countries'
-        elif 'landmarks' in line.lower():
-            current_category = 'landmarks'
-        elif 'regions' in line.lower():
-            current_category = 'regions'
-        elif current_category and line:
-            # Extract location names from line
-            items = re.findall(r'[A-Z][a-zA-Z\s]+', line)
-            locations[current_category].extend(items)
-    
-    return locations
     
 
 if __name__ == "__main__":

@@ -28,6 +28,40 @@ class NoArticleExtracted(Exception):
 
 
 class ArticleLocationExtractor:
+    """Extract locations from news articles, geocode them, and build an interactive map.
+
+    This class orchestrates an end-to-end pipeline:
+      1) Fetch article text from a URL (or accept raw text),
+      2) Use a Gemini model to extract real-world locations (cities, states, countries, landmarks),
+      3) Geocode each location with Nominatim (via a cached, rate-limited callable),
+      4) Create a Folium map and optionally open it in the browser.
+
+    Args:
+        api_key: Gemini API key. If None, the value is read from the
+            ``GEMINI_API_KEY`` environment variable.
+        model_name: Gemini model identifier to call (e.g., ``"gemini-2.5-pro"``).
+        user_agent: User-agent string passed to Nominatim.
+
+    Attributes:
+        api_key (str): The effective Gemini API key in use.
+        client (genai.Client): Gemini client initialized with ``api_key``.
+        model_name (str): The Gemini model to call for extraction.
+        geocode (Callable): Rate-limited Nominatim geocode function
+            (wrapped with ``RateLimiter``) that honors caching via ``requests_cache``.
+
+    Raises:
+        ValueError: If no API key is provided and ``GEMINI_API_KEY`` is unset.
+
+    Notes:
+        - Nominatim calls are rate-limited (min 1s between calls) and exceptions
+          are swallowed per ``RateLimiter`` configuration.
+        - Geocoding responses are cached for 7 days using ``requests_cache`` under
+          the ``"geocode_cache"`` namespace.
+        - See ``process_article`` for the main orchestration entrypoint. It can
+          accept a URL or raw text, handles common fetch/parse failures (e.g.
+          short ``403 Forbidden`` pages), and returns a bundle suitable for Streamlit.
+    """
+        
     def __init__(self, api_key: str, model_name:str = "gemini-2.5-pro", user_agent = "art_loc_extr_finder"):
         """Initialize with Gemini API key."""
         if api_key is None:

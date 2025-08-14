@@ -2,11 +2,50 @@ from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import requests_cache, pandas as pd
 from tqdm import tqdm
+from typing import Dict, List, Callable, Any
 
 
-def geocode_nominatim(inp_dict, geocode, lang="en", test_mode = False):
+def geocode_nominatim(
+    inp_dict: Dict[str, List[str]],
+    geocode: Callable[..., Any],
+    lang: str = "en",
+    test_mode: bool = False
+    ) -> List[Dict[str, Any]]:
+    
+    """
+    Geocode structured location fields row-by-row using a Nominatim `geocode` callable.
+    The input is a dictionary of parallel lists describing locations found in text.
+
+    Parameters
+    ----------
+    inp_dict : Dict[str, List[str]]
+        Structured, parallel lists for each location category.
+        Categories are: ['cities', 'countries','landmarks', 'provinces_counties', 'states','summary']
+    geocode : Callable[..., Any]
+        A callable compatible with `geopy`'s Nominatim `geocode` signature
+        (often a `RateLimiter` wrapper). It should accept either a string or a
+        structured dict query and return a `Location` or a list of `Location`s.
+    lang : str, optional
+        Preferred language code for geocoding (passed along when the callable supports it),
+        by default "en".
+    test_mode : bool, optional
+        If True, print debugging information, by default False.
+
+    Returns
+    -------
+    List[Dict[str, Any]]
+        A list of per-row geocoding results (e.g., chosen candidate metadata such
+        as name, latitude/longitude, and raw OSM fields). The exact shape of each
+        dict depends on how results are assembled later in the function.
+
+    Raises
+    ------
+    AssertionError
+        If `inp_dict` does not have the expected keys.
+    """
+        
     if test_mode:
-        print(f"\n{'#'*20}\dict input to geocode: {inp_dict}\n{'#'*20}")
+        print(f"\n{'#'*20}\ndict input to geocode: {inp_dict}\n{'#'*20}")
     assert sorted(list(inp_dict.keys())) == ['cities', 'countries','landmarks', 'provinces_counties', 'states','summary'], "Received wrong location dictionary, keys are not matching"
 
     #Format the input location types to Nominatim built-in types
