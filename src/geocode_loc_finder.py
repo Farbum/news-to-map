@@ -5,7 +5,8 @@ from tqdm import tqdm
 
 
 def geocode_nominatim(inp_dict, geocode, lang="en", test_mode = False):
-    print(f"\n{'#'*20}\dict input to geocode: {inp_dict}\n{'#'*20}")
+    if test_mode:
+        print(f"\n{'#'*20}\dict input to geocode: {inp_dict}\n{'#'*20}")
     assert sorted(list(inp_dict.keys())) == ['cities', 'countries','landmarks', 'provinces_counties', 'states','summary'], "Received wrong location dictionary, keys are not matching"
 
     #Format the input location types to Nominatim built-in types
@@ -157,7 +158,8 @@ def geocode_nominatim(inp_dict, geocode, lang="en", test_mode = False):
         .fillna("None")           # (optional) keep "None" if all are missing
     )
     df_out.drop(columns=['source', 'dis_name_temp'], inplace=True)
-    print(f"\n{'#'*20}\noutput from geocode: {pd.DataFrame(out).to_markdown()}\n{'#'*20}")
+    if test_mode:
+        print(f"\n{'#'*20}\noutput from geocode: {pd.DataFrame(out).to_markdown()}\n{'#'*20}")
     return df_out
 
 

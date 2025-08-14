@@ -1,16 +1,16 @@
 import streamlit as st
 from streamlit_folium import st_folium
 
-from main_pipeline import ArticleLocationExtractor  # adjust import to your file name
+from main_pipeline import ArticleLocationExtractor 
 
 st.set_page_config(page_title="News → Map", page_icon="🗺️", layout="wide")
 st.title("News → Map")
 st.caption("Paste a news URL or text. I’ll extract locations and plot them with relevant info on an interactive map")
 
-# Get API key from Streamlit secrets (don’t hardcode!)
+# Get API key from Streamlit secrets
 api_key = st.secrets.get("GEMINI_API_KEY", None)
 
-# Instantiate your orchestrator
+# Instantiate orchestrator
 extractor = ArticleLocationExtractor(api_key=api_key)
 
 # INIT session state

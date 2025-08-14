@@ -50,7 +50,7 @@ class ArticleLocationExtractor:
         return ext_url_text(url)
     
     def location_extractor(self, text):
-        return ext_locations(text, self.client, self.model_name)
+        return ext_locations(text, self.client, self.model_name, test_mode = False)
 
     def coord_finder(self, locations):
         return ext_coordinates(locations, self.geocode, test_mode = False)

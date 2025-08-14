@@ -44,9 +44,10 @@ def parse_fallback_response(text: str) -> Dict:
     return locations
     
                 
-def extract_locations_with_gemini(text: str, client, model_name:str) -> Dict:
+def extract_locations_with_gemini(text: str, client, model_name:str, test_mode = False) -> Dict:
     """Use Gemini API to extract locations from text."""
-    print(f"\n{'#'*20}text input to gemini: {text}\n{'#'*20}")
+    if test_mode:
+        print(f"\n{'#'*20}text input to gemini: {text}\n{'#'*20}")
     # Craft a detailed prompt for location extraction
     prompt = f"""
     Please analyze the following news article and extract ALL real-world locations mentioned, as well as a very concise summary of why this location is mentioned in the article.
@@ -133,8 +134,8 @@ def extract_locations_with_gemini(text: str, client, model_name:str) -> Dict:
             gen_result = response.text
             if not gen_result or str(gen_result).strip().lower() == "none":  # ADDED: treat empty/None as failure
                 raise ValueError("Gemini returned empty response.text")
-            
-            print(f"\n{'#'*20}\nresults from gemini:\n{gen_result}\n{'#'*20}")
+            if test_mode:
+                print(f"\n{'#'*20}\nresults from gemini:\n{gen_result}\n{'#'*20}")
             
             # Try to extract JSON from the response
             try:

@@ -12,17 +12,14 @@ Extract real-world locations from a news article (URL or pasted text), geocode t
 - [Project Layout](#project-layout)
 - [Prerequisites](#prerequisites)
 - [Setup](#setup)
-  - [1) Create a virtual environment](#1-create-a-virtual-environment)
-  - [2) Install dependencies](#2-install-dependencies)
-  - [3) Configure your API key](#3-configure-your-api-key)
+  - [1) Install dependencies](#1-install-dependencies)
+  - [2) Configure your API key](#2-configure-your-api-key)
 - [Run the App](#run-the-app)
   - [A) Streamlit UI](#a-streamlit-ui)
   - [B) Command-line (no UI)](#b-command-line-no-ui)
 - [How It Works](#how-it-works)
 - [Configuration Notes](#configuration-notes)
 - [Troubleshooting](#troubleshooting)
-- [Development Tips](#development-tips)
-- [License](#license)
 
 ---
 
